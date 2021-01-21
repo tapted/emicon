@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "allowJs": true,
+    "checkJs": true,
+
+    "outDir": "./dist/",
+    "strict": true,
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "Node",
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+}

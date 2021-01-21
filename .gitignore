@@ -1,0 +1,6 @@
+appengine-generated/
+node_modules/
+package-lock.json
+dist/
+public/js
+public/service-worker.js

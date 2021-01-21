@@ -1,0 +1,16 @@
+{
+  "name": "Words",
+  "icons": [
+    {
+      "src": "./icons/words-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "short_name": "Words",
+  "theme_color": "#2196f3",
+  "background_color": "#2196f3",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "start_url": "index.html"
+}
