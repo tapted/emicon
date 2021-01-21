@@ -24,9 +24,8 @@ class EContainer extends LitElement {
       `;
   }
   onSnackbarClosing(e: CustomEvent) {
-    if (resumePage && e.detail.reason === 'action') {
-      enableAudio = enableAudio || localStorage.getItem('audio') === 'true';
-      resumePage.doScroll();
+    if (e.detail.reason === 'action') {
+      console.log('Snackbar action');
     }
   }
   render() {
@@ -42,6 +41,7 @@ class EContainer extends LitElement {
 }
 
 const container = new EContainer();
+let firstFullLoad = Promise.resolve();
 
 async function initPages() {
   await container.updateComplete;

@@ -32,8 +32,11 @@ const devConfig = {
     // stats: "errors-only",
 
     host: '0.0.0.0',
-    port: 9000,
+    port: 8080,
     open: true, // Open the page in browser
+    allowedHosts: [
+        '.linux.test'
+    ],
     overlay: true,
     contentBase: 'public',
   },
