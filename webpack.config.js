@@ -35,7 +35,7 @@ const devConfig = {
     port: 8080,
     open: true, // Open the page in browser
     allowedHosts: [
-        '.linux.test'
+      '.linux.test',
     ],
     overlay: true,
     contentBase: 'public',
