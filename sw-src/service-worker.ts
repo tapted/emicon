@@ -24,5 +24,5 @@ registerRoute(
 
 registerRoute(
     new RegExp('https://cdn.jsdelivr.net/.*'),
-    new StaleWhileRevalidate(),
+    new StaleWhileRevalidate({}),
 );

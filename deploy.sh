@@ -1,5 +1,5 @@
 #!/bin/bash
-project="${basename $PWD}"
+project="$(basename $PWD)"
 npm run-script build
 cd ../tapted.github.io || exit 1
 cp -vr "../${project}/public/"* "${project}" || exit 1
