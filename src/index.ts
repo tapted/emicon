@@ -5,7 +5,10 @@ import {css, customElement, LitElement, property} from 'lit-element';
 import {Emoji, fetchFromCDN} from 'emojibase';
 import {html} from 'lit-html';
 import {repeat} from 'lit-html/directives/repeat.js';
-import * as JSZip from 'jszip';
+
+const zip = require('@zip.js/zip.js');
+
+zip.configure({useWebWorkers: false});
 
 const emojiVersion = Number(localStorage.getItem('emojiVersion')) || Infinity;
 const emojiPromise = fetchFromCDN(`en/data.json`);
@@ -32,7 +35,7 @@ class EContainer extends LitElement {
   @property({attribute: false}) current = '🥑';
   @property({attribute: false}) annotation = 'avocado';
   @property({attribute: false}) candidates =
-      [{rank: 9999, emoji: this.current, annotation: this.annotation}];
+    [{rank: 9999, emoji: this.current, annotation: this.annotation}];
 
   static get styles() {
     return css`
@@ -47,6 +50,9 @@ class EContainer extends LitElement {
       }
       :host::-webkit-scrollbar {
         display: none;
+      }
+      pre {
+        font-size: 2px;
       }
       canvas {
         width: 200px;
@@ -99,7 +105,7 @@ class EContainer extends LitElement {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = '400px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(this.current, canvas.width/2, 390);
+    ctx.fillText(this.current, canvas.width / 2, 390);
     this.generate(e);
   }
   async generate(e: MouseEvent): Promise<void> {
@@ -111,19 +117,36 @@ class EContainer extends LitElement {
       ctx.drawImage(source, 0, 0, s, s);
       icons[s] = await canvas.convertToBlob({type: 'image/png'});
     }
-    const zip = new JSZip();
+    const zipFile = new zip.ZipWriter(new zip.BlobWriter());
+    let iconManifest = '';
     for (const f in icons) {
       console.log(`${f} is ${icons[f].size} bytes`);
-      zip.file(`icon-${f}x${f}.png`, icons[f]);
+      await zipFile.add(`icon-${f}x${f}.png`, new zip.BlobReader(icons[f]));
+      if (iconManifest) iconManifest += ',';
+      iconManifest += `
+        {
+          "src": "./icons/icon-${f}x${f}.png",
+          "type": "image/png",
+          "sizes": "${f}x${f}"
+        }`;
     }
     console.log('Generating zip..');
-    zip.generateAsync({type : 'blob', compression: 'DEFLATE'}).then(blob => {
-      console.log('done!');
-      blobToDownload = blob;
-      this.renderRoot.querySelector('#download')?.removeAttribute('disabled');
-    });
+    blobToDownload = await zipFile.close();
+    const text = this.renderRoot.querySelector('pre')!;
+    text.innerText = `{
+      "name": "Emicon",
+      "icons": [${iconManifest}
+      ],
+      "short_name": "Emicon",
+      "theme_color": "#2196f3",
+      "background_color": "#2196f3",
+      "display": "fullscreen",
+      "orientation": "portrait",
+      "start_url": "index.html"
+    }`;
+    this.renderRoot.querySelector('#download')?.removeAttribute('disabled');
   }
-  download(e:MouseEvent) {
+  download(e: MouseEvent) {
     downloadBlob(blobToDownload, 'icons.zip');
   }
   render() {
@@ -154,6 +177,8 @@ class EContainer extends LitElement {
           ${e.emoji}
         </span>`)}
       </div>
+      <pre>
+      </pre>
       <mwc-snackbar
           timeoutMs="-1"
           @MDCSnackbar:closing=${this.onSnackbarClosing}>
@@ -174,7 +199,7 @@ async function initPages() {
   container.emojis = emojis;
 }
 
-document.addEventListener('DOMContentLoaded', (e)=> {
+document.addEventListener('DOMContentLoaded', (e) => {
   document.body.appendChild(container);
   firstFullLoad = initPages();
 });
