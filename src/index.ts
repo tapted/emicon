@@ -1,9 +1,9 @@
 import '@material/mwc-button';
 
 import {Emoji, fetchFromCDN} from 'emojibase';
-import {LitElement, css, customElement, property} from 'lit-element';
-import {html} from 'lit-html';
-import {repeat} from 'lit-html/directives/repeat.js';
+import {LitElement, css, html} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+import {repeat} from 'lit/directives/repeat.js';
 
 const zip = require('@zip.js/zip.js');
 
@@ -13,6 +13,8 @@ const emojiVersion = Number(localStorage.getItem('emojiVersion')) || Infinity;
 const emojiPromise = fetchFromCDN(`en/data.json`);
 
 const DRAW_SIZE = 512;
+const FONT_SIZE = DRAW_SIZE * 400 / 512;
+const BASELINE = FONT_SIZE - 10;
 const DIMENSIONS = [16, 32, 48, 72, 96, 120, 128, 144, 152, 180, 192, 384, 512];
 
 let blobToDownload = new Blob([]);
@@ -35,6 +37,7 @@ class EContainer extends LitElement {
   @property({attribute: false}) annotation = 'avocado';
   @property({attribute: false}) candidates =
     [{rank: 9999, emoji: this.current, annotation: this.annotation}];
+  @property({type: Boolean, reflect: true}) vector = true;
 
   static get styles() {
     return css`
@@ -46,6 +49,9 @@ class EContainer extends LitElement {
         overflow-x: scroll;
         overflow-y: hidden;
         width: 100vw;
+      }
+      :host([vector]) :where(.current, .candidates) {
+        font-family: "Noto Colr Emoji Glyf";
       }
       :host::-webkit-scrollbar {
         display: none;
@@ -97,9 +103,10 @@ class EContainer extends LitElement {
     const canvas = this.renderRoot.querySelector('canvas')!;
     const ctx = canvas?.getContext('2d')!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = '400px sans-serif';
+    const family = this.vector ? '"Noto Colr Emoji Glyf"' : 'sans-serif';
+    ctx.font = `${FONT_SIZE}px ${family}`;
     ctx.textAlign = 'center';
-    ctx.fillText(this.current, canvas.width / 2, 390);
+    ctx.fillText(this.current, canvas.width / 2, BASELINE);
     this.generate(e);
   }
   async generate(e: MouseEvent): Promise<void> {
@@ -150,6 +157,10 @@ class EContainer extends LitElement {
           type="text"
           value="avocado"
           @input=${this.onInput}>
+      <label>
+        <input type="checkbox" @change=${() => this.vector = !this.vector} checked>
+        Vector Fonts
+      </label>
       <div class="current">
         ${this.current}
       </div>
