@@ -1,10 +1,17 @@
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 // const htmlPlugin = require('html-webpack-plugin');
 // const cleanPlugin = require('clean-webpack-plugin');
 // const ErrorOverlayPlugin = require('error-overlay-webpack-plugin')
 
+const bundleAnalyzerOptions = {
+  analyzerHost: '10.0.0.190',
+};
+
 let config = {
-  entry: './src/index.ts',
+  context: path.resolve(__dirname, 'src'),
+  entry: './index.ts',
   module: {
     rules: [
       {
@@ -16,12 +23,15 @@ let config = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {'url': require.resolve('url/')},
   },
   output: {
     filename: 'js/bundle.js',
     path: path.resolve(__dirname, 'public'),
   },
   // plugins: [new ErrorOverlayPlugin()],
+  plugins: [
+  ],
 };
 
 const devConfig = {
@@ -37,10 +47,9 @@ const devConfig = {
     allowedHosts: [
       '.linux.test',
     ],
-    overlay: true,
-    contentBase: 'public',
+    // overlay: true,
+    static: 'public',
   },
-  watch: true,
 };
 
 module.exports = (env, argv) => {
@@ -49,8 +58,14 @@ module.exports = (env, argv) => {
   } else {
     config.mode = 'production';
   }
+  if (argv.mode === 'analyze') {
+    // This starts a webserver, so shouldn't be run from a build command.
+    const analyzer = new BundleAnalyzerPlugin(bundleAnalyzerOptions);
+    config.plugins = [...(config.plugins ?? []), analyzer];
+  }
   if (env && env.sw) {
-    config.entry = './sw-src/service-worker.ts',
+    config.context = __dirname + '/sw-src',
+    config.entry = './service-worker.ts',
     config.output = {
       filename: 'service-worker.js',
       path: path.resolve(__dirname, 'public'),

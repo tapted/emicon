@@ -1,8 +1,7 @@
 import '@material/mwc-button';
-import '@material/mwc-snackbar';
 
-import {css, customElement, LitElement, property} from 'lit-element';
 import {Emoji, fetchFromCDN} from 'emojibase';
+import {LitElement, css, customElement, property} from 'lit-element';
 import {html} from 'lit-html';
 import {repeat} from 'lit-html/directives/repeat.js';
 
@@ -72,16 +71,11 @@ class EContainer extends LitElement {
       }
       `;
   }
-  onSnackbarClosing(e: CustomEvent) {
-    if (e.detail.reason === 'action') {
-      console.log('Snackbar action');
-    }
-  }
   onInput(e: InputEvent) {
     const value = (e.target as HTMLInputElement).value;
     const matches = [{rank: 9999, emoji: this.current, annotation: ''}];
     for (const e of this.emojis) {
-      const annotation = e.annotation;
+      const annotation = e.label;
       const rank = annotation.indexOf(value);
       const emoji = e.emoji;
       if (rank >= 0) {
@@ -110,16 +104,16 @@ class EContainer extends LitElement {
   }
   async generate(e: MouseEvent): Promise<void> {
     const source = this.renderRoot.querySelector('canvas')!;
-    const icons = [] as Blob[];
+    const icons: Record<string, Blob> = {};
     for (const s of DIMENSIONS) {
       const canvas = new OffscreenCanvas(s, s);
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
       ctx.drawImage(source, 0, 0, s, s);
       icons[s] = await canvas.convertToBlob({type: 'image/png'});
     }
     const zipFile = new zip.ZipWriter(new zip.BlobWriter());
     let iconManifest = '';
-    for (const f in icons) {
+    for (const f of Object.keys(icons)) {
       console.log(`${f} is ${icons[f].size} bytes`);
       await zipFile.add(`icon-${f}x${f}.png`, new zip.BlobReader(icons[f]));
       if (iconManifest) iconManifest += ',';
@@ -179,12 +173,6 @@ class EContainer extends LitElement {
       </div>
       <pre>
       </pre>
-      <mwc-snackbar
-          timeoutMs="-1"
-          @MDCSnackbar:closing=${this.onSnackbarClosing}>
-        <mwc-button slot="action">RESUME</mwc-button>
-        <mwc-button slot="dismiss">✖️</mwc-button>
-      </mwc-snackbar>
     `;
   }
 }
@@ -209,3 +197,7 @@ window.addEventListener('load', (e) => {
     navigator.serviceWorker.register('./service-worker.js');
   }
 });
+
+export const unused = {
+  customElement, property, firstFullLoad,
+};
