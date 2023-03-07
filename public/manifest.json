@@ -72,5 +72,6 @@
   "background_color": "#2196f3",
   "display": "fullscreen",
   "orientation": "portrait",
-  "start_url": "index.html"
+  "start_url": "index.html",
+  "id": "/index.html"
 }

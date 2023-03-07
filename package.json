@@ -14,7 +14,6 @@
   },
   "homepage": "https://github.com/tapted/emicon#readme",
   "dependencies": {
-    "@material/mwc-button": "^0.27.0",
     "@types/offscreencanvas": "^2019.7.0",
     "@zip.js/zip.js": "^2.6.75",
     "emojibase": "^6.1.0",
